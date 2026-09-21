@@ -7334,7 +7334,7 @@
   "saveManualExecutions": true,
   "saveDataErrorExecution": "all",
   "saveDataSuccessExecution": "none",
-  "saveExecutionProgress": true,
+  "saveExecutionProgress": false,
   "executionTimeout": 7200,
   "timezone": "Africa/Algiers"
  },
