@@ -1,0 +1,122 @@
+diff --git a/packages/workflow/src/common/get-connected-nodes.ts b/packages/workflow/src/common/get-connected-nodes.ts
+index ea0bacef48..PERF0000000 100644
+--- a/packages/workflow/src/common/get-connected-nodes.ts
++++ b/packages/workflow/src/common/get-connected-nodes.ts
+@@ -1,5 +1,43 @@
+ import { NodeConnectionTypes } from '../interfaces';
+ import type { IConnections, NodeConnectionType } from '../interfaces';
+ 
++/**
++ * Small ordered set used by graph traversal.
++ *
++ * The traversal needs the historical "move to front" ordering, but using
++ * Array.indexOf() + splice() + unshift() makes every reconverging branch
++ * increasingly expensive. A linked list plus an index keeps those operations
++ * O(1) while preserving the exact ordering semantics of the previous code.
++ */
++class OrderedNodeSet {
++	private readonly nodes = new Map<string, { prev: string | null; next: string | null }>();
++
++	private head: string | null = null;
++
++	private tail: string | null = null;
++
++	moveToFront(node: string): void {
++		if (this.head === node) return;
++
++		const existing = this.nodes.get(node);
++		if (existing) {
++			if (existing.prev !== null) this.nodes.get(existing.prev)!.next = existing.next;
++			if (existing.next !== null) this.nodes.get(existing.next)!.prev = existing.prev;
++			if (this.tail === node) this.tail = existing.prev;
++		} else {
++			this.nodes.set(node, { prev: null, next: null });
++		}
++
++		const oldHead = this.head;
++		const entry = this.nodes.get(node)!;
++		entry.prev = null;
++		entry.next = oldHead;
++		if (oldHead !== null) this.nodes.get(oldHead)!.prev = node;
++		else this.tail = node;
++		this.head = node;
++	}
++
++	toArray(): string[] {
++		const result: string[] = [];
++		let current = this.head;
++		while (current !== null) {
++			result.push(current);
++			current = this.nodes.get(current)!.next;
++		}
++		return result;
++	}
++}
++
+ /**
+  * Returns the names of all nodes reachable from `nodeName` by following the
+  * given connection type, excluding `nodeName` itself. Each node appears once,
+@@ -53,8 +91,7 @@ function collectConnectedNodes(
+ 	let addNodes: string[];
+-	let nodeIndex: number;
+ 	let i: number;
+-	let parentNodeName: string;
+-	const returnNodes: string[] = [];
++	const returnNodes = new OrderedNodeSet();
+ 
+ 	currentPath.add(nodeName);
+ 
+@@ -69,38 +106,25 @@ function collectConnectedNodes(
+ 			connectionsByIndex?.forEach((connection) => {
+ 				if (currentPath.has(connection.node)) {
+ 					// Node is an ancestor on the current path, so skip it
+ 					return;
+ 				}
+ 
+-				// A node can be both a direct connection and a transitive descendant
+-				// via another branch (a shortcut diamond). If it was already collected
+-				// through a sibling branch, move it to the front instead of adding a
+-				// duplicate — mirroring the dedup done for `addNodes` below.
+-				const existingIndex = returnNodes.indexOf(connection.node);
+-				if (existingIndex !== -1) {
+-					returnNodes.splice(existingIndex, 1);
+-				}
+-				returnNodes.unshift(connection.node);
++				// Preserve the previous move-to-front semantics without O(n) array
++				// searches/splices on every reconverging edge.
++				returnNodes.moveToFront(connection.node);
+ 
+ 				addNodes = collectConnectedNodes(
+ 					connections,
+ 					connection.node,
+@@ -111,24 +135,14 @@ function collectConnectedNodes(
+ 				);
+ 
+ 				for (i = addNodes.length; i--; i > 0) {
+ 					// Because nodes can have multiple parents it is possible that
+ 					parts of the tree is parent of both and to not add nodes
+ 					// twice check first if they already got added before.
+-					parentNodeName = addNodes[i];
+-					nodeIndex = returnNodes.indexOf(parentNodeName);
+-
+-					if (nodeIndex !== -1) {
+-						// Node got found before so remove it from current location
+-						// that node-order stays correct
+-						returnNodes.splice(nodeIndex, 1);
+-					}
+-
+-					returnNodes.unshift(parentNodeName);
++					returnNodes.moveToFront(addNodes[i]);
+ 				}
+ 			});
+ 		});
+ 	});
+ 
+ 	currentPath.delete(nodeName);
+-	memo.set(memoKey, returnNodes);
++	const result = returnNodes.toArray();
++	memo.set(memoKey, result);
+ 
+-	return returnNodes;
++	return result;
+ }
