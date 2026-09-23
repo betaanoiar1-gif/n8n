@@ -4702,7 +4702,7 @@
         ],
         [
           {
-            "node": "Failure Policy - Retry or Quarantine",
+            "node": "Reject Unknown State",
             "type": "main",
             "index": 0
           }
