@@ -6225,17 +6225,6 @@
         ]
       ]
     },
-    "Normalize Infrastructure Error": {
-      "main": [
-        [
-          {
-            "node": "Fence Infrastructure Failure",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Idle - No Due Work": {
       "main": [
         [],
@@ -6891,24 +6880,6 @@
     "Local Operations Status": {
       "main": [
         [],
-        [
-          {
-            "node": "Fence Infrastructure Failure",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Alert Delivery Failed": {
-      "main": [
-        [
-          {
-            "node": "Local Operations Status",
-            "type": "main",
-            "index": 0
-          }
-        ],
         [
           {
             "node": "Fence Infrastructure Failure",
