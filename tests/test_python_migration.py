@@ -71,7 +71,7 @@ def test_executor_if_and_graph():
             {"name": "Check", "type": "n8n-nodes-base.if", "parameters": {
                 "conditions": {"conditions": [{
                     "leftValue": "={{ $json.value }}",
-                    "rightValue": "3",
+                    "rightValue": 3,
                     "operator": {"operation": "equals"}
                 }], "combinator": "and"}
             }},
