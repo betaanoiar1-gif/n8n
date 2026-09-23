@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YouTube Autonomous Growth OS</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0b1020;color:#eef2ff;font-family:Segoe UI,Tahoma,sans-serif}
+.wrap{max-width:1100px;margin:auto;padding:28px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+h1{font-size:26px;margin:0}.muted{color:#9aa7c4}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+.card{background:#121a2d;border:1px solid #26324d;border-radius:16px;padding:20px;box-shadow:0 12px 30px #0003}
+label{display:block;margin:13px 0 6px;color:#b9c4dc;font-size:13px}input{width:100%;padding:12px;border-radius:10px;border:1px solid #33415f;background:#0c1324;color:#fff;outline:none}
+button{border:0;border-radius:10px;padding:12px 17px;cursor:pointer;background:#2563eb;color:white;font-weight:600;margin-left:8px}button.secondary{background:#27334e}button.danger{background:#a83b4b}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.status{font-size:28px;font-weight:700;margin:10px 0}.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#20304f;color:#bcd2ff}.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #26324d}.notice{padding:12px;border-radius:10px;background:#171f34;margin-top:12px;white-space:pre-wrap}.ok{color:#6ee7b7}.err{color:#fb7185}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.wrap{padding:15px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><div><h1>🚀 YouTube Autonomous Growth OS</h1><div class="muted">Python Runtime · واجهة التحكم المحلية</div></div><span id="badge" class="pill">جاري الاتصال...</span></div>
+<div class="grid">
+<section class="card">
+<h2>المفاتيح والإعدادات</h2>
+<div class="muted">المفاتيح تُحفظ محليًا في ملف <code>.env</code> ولا تُرسل إلى GitHub.</div>
+<div id="fields"></div>
+<div class="actions"><button onclick="save()">حفظ الإعدادات</button><button class="secondary" onclick="load()">تحديث</button></div>
+<div id="msg" class="notice"></div>
+</section>
+<section class="card">
+<h2>التحكم</h2>
+<div class="row"><span>حالة التشغيل</span><b id="run">—</b></div>
+<div class="row"><span>المجدول</span><b id="sched">—</b></div>
+<div class="row"><span>الفاصل</span><b>15 دقيقة</b></div>
+<div class="row"><span>Nodes</span><b id="nodes">—</b></div>
+<div class="actions"><button onclick="run()">▶ تشغيل دورة الآن</button><button class="secondary" onclick="toggle()">تفعيل/إيقاف المجدول</button></div>
+<div id="result" class="notice">جاهز.</div>
+</section>
+</div>
+</div>
+<script>
+const fields=[
+["POSTGRES_DSN","PostgreSQL DSN","text"],["WORKER_CREDENTIAL_VALUE","Worker Key","password"],
+["KIOS_API_KEY","KiosAPI Key","password"],["PEXELS_API_KEY","Pexels API Key","password"],
+["PIXABAY_API_KEY","Pixabay API Key","password"],["OPENROUTER_API_KEY","OpenRouter API Key","password"],
+["YOUTUBE_ACCESS_TOKEN","YouTube Access Token","password"],["YOUTUBE_CLIENT_ID","YouTube Client ID","text"],
+["YOUTUBE_CLIENT_SECRET","YouTube Client Secret","password"],["YOUTUBE_REFRESH_TOKEN","YouTube Refresh Token","password"]];
+function render(data){document.getElementById("fields").innerHTML=fields.map(([k,l,t])=>'<label>'+l+'</label><input id="'+k+'" type="'+t+'" value="'+(data[k]||"").replaceAll('"','&quot;')+'">').join('')}
+async function load(){let r=await fetch('/api/settings');let d=await r.json();render(d);document.getElementById("msg").textContent="تم تحميل الإعدادات."}
+async function save(){let d={};fields.forEach(([k])=>d[k]=document.getElementById(k).value);d.SCHEDULE_ENABLED=document.getElementById("sched").dataset.enabled!=="false";let r=await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});document.getElementById("msg").textContent=r.ok?"تم الحفظ محليًا.":"فشل الحفظ."}
+async function status(){let r=await fetch('/api/status');let d=await r.json();document.getElementById("badge").textContent=d.configured?"متصل":"أكمل إعداد PostgreSQL";document.getElementById("nodes").textContent=d.workflow_nodes;document.getElementById("sched").textContent=d.scheduler_enabled?"يعمل":"متوقف";document.getElementById("sched").dataset.enabled=d.scheduler_enabled;document.getElementById("run").textContent=d.status.status;document.getElementById("run").className=d.status.status==="error"?"err":d.status.status==="completed"?"ok":""}
+async function run(){document.getElementById("result").textContent="جاري تنفيذ الدورة...";let r=await fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:"full_cycle"})});let d=await r.json();document.getElementById("result").textContent=r.ok?"اكتملت الدورة.\n"+JSON.stringify(d.result||{},null,2):"خطأ: "+(d.detail||"unknown");status()}
+async function toggle(){let en=document.getElementById("sched").dataset.enabled!=="true";await fetch('/api/scheduler',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:en})});status()}
+load();status();setInterval(status,5000);
+</script>
+</body></html>

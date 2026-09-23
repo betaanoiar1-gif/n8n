@@ -1,0 +1,40 @@
+{
+  "source_workflow": "YouTube Autonomous Growth OS V2.1 — Cloud LLM — Node Lite",
+  "source_node_count": 131,
+  "connection_count": 130,
+  "execution_strategy": {
+    "code_nodes": "verbatim via Node.js bridge",
+    "postgres": "asyncpg with original SQL",
+    "http": "httpx with workflow headers/query/body/binary behavior and credential injection",
+    "if_switch": "Python routing with the workflow's condition operators",
+    "wait": "asyncio sleep; the workflow's only wait is bounded AI repair backoff capped by 30 seconds",
+    "scheduler": "integrated 15-minute background scheduler"
+  },
+  "credential_references": [
+    "WORKER_CREDENTIAL",
+    "Postgres account",
+    "KIOS_CREDENTIAL",
+    "YOUTUBE_CREDENTIAL",
+    "PEXELS_CREDENTIAL",
+    "PIXABAY_CREDENTIAL",
+    "OPENROUTER_CREDENTIAL"
+  ],
+  "local_ui": {
+    "path": "/ui/",
+    "features": [
+      "Arabic RTL dashboard",
+      "local credential configuration",
+      "masked secret fields",
+      "manual full-cycle execution",
+      "scheduler enable/disable",
+      "live status polling"
+    ],
+    "security": "localhost-oriented; credentials are written to local .env and .env is excluded from Git"
+  },
+  "verification": {
+    "static_contract_tests": "pytest suite committed",
+    "ci": "GitHub Actions workflow committed as optional CI only",
+    "live_external_apis": "must be verified on the user's Windows machine because secrets and private PostgreSQL are not available to the repository runtime"
+  },
+  "known_boundary": "This is a behavior-preserving n8n-to-Python runtime migration, not a reimplementation of every internal n8n feature. The workflow's observed Code-node globals and node types are covered; unknown node types fail closed."
+}
