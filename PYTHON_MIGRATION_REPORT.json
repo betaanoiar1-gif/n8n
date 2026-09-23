@@ -1,25 +1,14 @@
 {
-  "source_workflow": "YouTube Autonomous Growth OS V2.1 — Cloud LLM — Node Lite 5",
+  "source_workflow": "YouTube Autonomous Growth OS V2.1 — Cloud LLM — Node Lite",
   "source_node_count": 131,
   "connection_count": 130,
-  "node_type_counts": {
-    "n8n-nodes-base.manualTrigger": 1,
-    "n8n-nodes-base.scheduleTrigger": 1,
-    "n8n-nodes-base.webhook": 2,
-    "n8n-nodes-base.code": 70,
-    "n8n-nodes-base.postgres": 20,
-    "n8n-nodes-base.switch": 5,
-    "n8n-nodes-base.if": 12,
-    "n8n-nodes-base.httpRequest": 18,
-    "n8n-nodes-base.wait": 1,
-    "n8n-nodes-base.respondToWebhook": 1
-  },
   "execution_strategy": {
     "code_nodes": "verbatim via Node.js bridge",
-    "postgres": "asyncpg executeQuery with original SQL",
-    "http": "httpx with original request expressions",
-    "if_switch": "original n8n condition expressions evaluated as JavaScript",
-    "wait": "asyncio sleep using original amount; persisted workflow checkpoints/state machine remain authoritative for durable job resume, but an in-flight wait is not itself persisted by the Python process"
+    "postgres": "asyncpg with original SQL",
+    "http": "httpx with workflow headers/query/body/binary behavior and credential injection",
+    "if_switch": "Python routing with the workflow's condition operators",
+    "wait": "asyncio sleep; the workflow's only wait is bounded AI repair backoff capped by 30 seconds",
+    "scheduler": "integrated 15-minute background scheduler"
   },
   "credential_references": [
     "WORKER_CREDENTIAL",
@@ -30,17 +19,22 @@
     "PIXABAY_CREDENTIAL",
     "OPENROUTER_CREDENTIAL"
   ],
-  "unsupported_by_design": [
-    "No silent fallback for unknown n8n node types",
-    "No replacement of external services/models"
-  ],
-  "verification_status": "Static migration committed to python-migration; runtime credentials and live API execution require the user's environment.",
-  "compatibility": {
-    "code_runtime": "Node.js vm bridge; all 70 source Code nodes use only supported n8n globals ($json, $env, $execution, $, $input)",
-    "previous_items": "$().item/.first/.all/.allData supported for stored node outputs",
-    "http_binary": "download file responses and binaryData uploads supported",
-    "youtube_oauth": "YOUTUBE_ACCESS_TOKEN or refresh-token flow supported",
-    "scheduler_interval_minutes": 15,
-    "tests": "pytest compatibility suite added; CI configured to run syntax, JSON, and tests"
-  }
+  "local_ui": {
+    "path": "/ui/",
+    "features": [
+      "Arabic RTL dashboard",
+      "local credential configuration",
+      "masked secret fields",
+      "manual full-cycle execution",
+      "scheduler enable/disable",
+      "live status polling"
+    ],
+    "security": "localhost-oriented; credentials are written to local .env and .env is excluded from Git"
+  },
+  "verification": {
+    "static_contract_tests": "pytest suite committed",
+    "ci": "GitHub Actions workflow committed as optional CI only",
+    "live_external_apis": "must be verified on the user's Windows machine because secrets and private PostgreSQL are not available to the repository runtime"
+  },
+  "known_boundary": "This is a behavior-preserving n8n-to-Python runtime migration, not a reimplementation of every internal n8n feature. The workflow's observed Code-node globals and node types are covered; unknown node types fail closed."
 }
