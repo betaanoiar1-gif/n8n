@@ -1,0 +1,38 @@
+{
+  "source_workflow": "YouTube Autonomous Growth OS V2.1 — Cloud LLM — Node Lite 5",
+  "source_node_count": 131,
+  "connection_count": 130,
+  "node_type_counts": {
+    "n8n-nodes-base.manualTrigger": 1,
+    "n8n-nodes-base.scheduleTrigger": 1,
+    "n8n-nodes-base.webhook": 2,
+    "n8n-nodes-base.code": 70,
+    "n8n-nodes-base.postgres": 20,
+    "n8n-nodes-base.switch": 5,
+    "n8n-nodes-base.if": 12,
+    "n8n-nodes-base.httpRequest": 18,
+    "n8n-nodes-base.wait": 1,
+    "n8n-nodes-base.respondToWebhook": 1
+  },
+  "execution_strategy": {
+    "code_nodes": "verbatim via Node.js bridge",
+    "postgres": "asyncpg executeQuery with original SQL",
+    "http": "httpx with original request expressions",
+    "if_switch": "original n8n condition expressions evaluated as JavaScript",
+    "wait": "durable workflow state remains responsible for resume"
+  },
+  "credential_references": [
+    "WORKER_CREDENTIAL",
+    "Postgres account",
+    "KIOS_CREDENTIAL",
+    "YOUTUBE_CREDENTIAL",
+    "PEXELS_CREDENTIAL",
+    "PIXABAY_CREDENTIAL",
+    "OPENROUTER_CREDENTIAL"
+  ],
+  "unsupported_by_design": [
+    "No silent fallback for unknown n8n node types",
+    "No replacement of external services/models"
+  ],
+  "verification_status": "Static migration committed to python-migration; runtime credentials and live API execution require the user's environment."
+}
