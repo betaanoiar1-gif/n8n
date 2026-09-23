@@ -102,9 +102,11 @@ def auth(token):
 async def scheduler_loop():
     while True:
         try:
+            await asyncio.sleep(900)
             load_dotenv(ENV_FILE, override=True)
-            if os.getenv("SCHEDULE_ENABLED", "true").lower() == "true":
-                await run_once("scheduled")
+            if os.getenv("SCHEDULE_ENABLED", "true").lower() != "true":
+                continue
+            await run_once("scheduled")
         except asyncio.CancelledError:
             raise
         except Exception as exc:
