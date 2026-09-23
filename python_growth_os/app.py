@@ -101,8 +101,8 @@ def auth(token):
 
 async def scheduler_loop():
     while True:
+        await asyncio.sleep(900)
         try:
-            await asyncio.sleep(900)
             load_dotenv(ENV_FILE, override=True)
             if os.getenv("SCHEDULE_ENABLED", "true").lower() != "true":
                 continue
@@ -111,7 +111,6 @@ async def scheduler_loop():
             raise
         except Exception as exc:
             print("[scheduler]", exc)
-        await asyncio.sleep(900)
 
 @app.on_event("startup")
 async def startup():
